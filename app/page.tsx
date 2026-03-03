@@ -96,7 +96,7 @@ export default function Home() {
         )}
       </div>
     </div>
-    // ... 위쪽 코드는 그대로 두세요 ...
+   
 
       {/* 👇 [여기서부터 복사] 구분선과 깃허브 링크 버튼 */}
       <hr style={{ margin: '30px 0', border: 'none', borderTop: '1px solid #eee' }} />
@@ -106,7 +106,7 @@ export default function Home() {
       </p>
       
       <a 
-        href="여기에_복사한_깃허브_주소를_붙여넣으세요" 
+        href="https://github.com/githyuk/data-school-1st-azure-static-web-app.git" 
         target="_blank" 
         rel="noopener noreferrer"
         style={{ 
@@ -132,7 +132,5 @@ export default function Home() {
 
     </div>
   </div>
-);
-}
   );
 }
