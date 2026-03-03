@@ -1,90 +1,102 @@
-/**
- * map_upgrade.js - 리액트 연동 버전
- */
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import psycopg2
+from fastapi.middleware.cors import CORSMiddleware
 
-// 전역 변수 선언
-var map = null;
-var myMarker = null;
-var polyline = null;
-var routeSteps = [];
-var lastSpokenStep = -1;
+app = FastAPI(title="세이프 패스 API 서버")
 
-// 🚀 [핵심 수정] 지도를 그리는 기능을 함수로 감쌌습니다.
-// 로그인 후 <div id="map">이 생기면 리액트가 이 함수를 호출할 겁니다.
-window.initMap = function() {
-    var container = document.getElementById('map');
-    if (!container) {
-        console.error("지도를 그릴 영역(div#map)을 찾지 못했습니다.");
-        return;
-    }
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    var options = { center: new kakao.maps.LatLng(37.5665, 126.9780), level: 4 };
-    map = new kakao.maps.Map(container, options);
-    console.log("카카오맵 초기화 완료!");
-};
-
-// 🔊 음성 출력 함수
-function speak(text) {
-    var subtitleBox = document.getElementById('subtitle-box');
-    if (subtitleBox) subtitleBox.innerHTML = "🔊 " + text;
-
-    if (typeof SpeechSynthesisUtterance === "undefined") return;
-    window.speechSynthesis.cancel();
-    var msg = new SpeechSynthesisUtterance(text);
-    msg.lang = "ko-KR";
-    msg.rate = 1.0; 
-    window.speechSynthesis.speak(msg);
+DB_CONFIG = {
+    "host": "team4-db.postgres.database.azure.com",
+    "database": "postgres",
+    "user": "azure_root",
+    "password": "qwer1234!",
+    "port": "5432",
+    "sslmode": "require"
 }
 
-// 🚶 길찾기 로직 (간소화된 예시)
-window.findRoute = function(lat, lng, shelterName) {
-    if (!map) return;
-    
-    // 내 위치 가짜 설정 (테스트용: 시청역)
-    var startLat = 37.5657;
-    var startLng = 126.9769;
+class UserSignup(BaseModel):
+    userid: str
+    password: str
+    name: str
+    birthyear: int
+    address: str
 
-    speak(shelterName + "으로 안내를 시작합니다.");
+class UserLogin(BaseModel):
+    userid: str
+    password: str
 
-    // 지도 중심 이동
-    var moveLatLon = new kakao.maps.LatLng(lat, lng);
-    map.panTo(moveLatLon);
-    
-    // 경로 그리기 (단순 직선 예시)
-    if (polyline) polyline.setMap(null);
-    var linePath = [
-        new kakao.maps.LatLng(startLat, startLng),
-        new kakao.maps.LatLng(lat, lng)
-    ];
-    polyline = new kakao.maps.Polyline({
-        path: linePath,
-        strokeWeight: 5,
-        strokeColor: '#FFAE00',
-        strokeOpacity: 0.7,
-        strokeStyle: 'solid'
-    });
-    polyline.setMap(map);
-};
+# 1. 회원가입
+@app.post("/api/signup")
+def create_user(user: UserSignup):
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor()
+        query = "INSERT INTO users (userid, password, name, address, birthyear) VALUES (%s, %s, %s, %s, %s)"
+        cur.execute(query, (user.userid, user.password, user.name, user.address, user.birthyear))
+        conn.commit()
+        return {"status": "success", "message": f"환영합니다, {user.name}님! 가입이 완료되었습니다."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if 'conn' in locals(): cur.close(); conn.close()
 
-// 📍 마커 찍기 함수 (파이썬 데이터 연동)
-window.initMarkers = function(shelterData) {
-    if (!map) {
-        console.error("지도가 아직 생성되지 않았습니다.");
-        return;
-    }
-    
-    // 기존 마커 초기화 코드가 필요하다면 추가
-    shelterData.forEach(function(s) {
-        var markerPosition  = new kakao.maps.LatLng(s.lat, s.lng); 
-        var marker = new kakao.maps.Marker({
-            position: markerPosition
-        });
-        marker.setMap(map);
+# 2. 로그인 (이름 반환 확인)
+@app.post("/api/login")
+def login_user(user: UserLogin):
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor()
+        # userid로 조회해서 password와 name을 가져옵니다.
+        cur.execute("SELECT password, name FROM users WHERE userid = %s", (user.userid,))
+        result = cur.fetchone()
+        
+        if result is None:
+            raise HTTPException(status_code=400, detail="존재하지 않는 아이디입니다.")
+        
+        db_password, db_name = result
+        
+        if db_password != user.password:
+            raise HTTPException(status_code=400, detail="비밀번호가 일치하지 않습니다.")
+            
+        # 💡 [중요] 여기서 username을 꼭 돌려줘야 프론트엔드 상단에 뜹니다!
+        return {
+            "status": "success", 
+            "message": f"{db_name}님 환영합니다!", 
+            "username": db_name 
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if 'conn' in locals(): cur.close(); conn.close()
 
-        // 클릭 이벤트
-        kakao.maps.event.addListener(marker, 'click', function() {
-            window.findRoute(s.lat, s.lng, s.name);
-        });
-    });
-    console.log(shelterData.length + "개의 쉼터 마커 생성 완료");
-};
+# 3. 쉼터 데이터
+@app.get("/api/shelters")
+def get_shelters():
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor()
+        query = """
+            SELECT shelter_name, lat, lon FROM heat_shelter
+            UNION ALL
+            SELECT shelter_name, lat, lon FROM cold_shelter
+        """
+        cur.execute(query)
+        rows = cur.fetchall()
+        
+        shelters = []
+        for row in rows:
+            shelters.append({"name": row[0], "lat": float(row[1]), "lng": float(row[2])})
+        return shelters
+    except Exception as e:
+        print(f"DB 에러: {e}")
+        return []
+    finally:
+        if 'conn' in locals(): cur.close(); conn.close()
