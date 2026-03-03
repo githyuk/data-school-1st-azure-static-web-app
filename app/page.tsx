@@ -96,5 +96,43 @@ export default function Home() {
         )}
       </div>
     </div>
+    // ... 위쪽 코드는 그대로 두세요 ...
+
+      {/* 👇 [여기서부터 복사] 구분선과 깃허브 링크 버튼 */}
+      <hr style={{ margin: '30px 0', border: 'none', borderTop: '1px solid #eee' }} />
+      
+      <p style={{ fontSize: '13px', color: '#666', marginBottom: '10px' }}>
+        이 서비스의 <strong>소스 코드</strong>가 궁금하신가요?
+      </p>
+      
+      <a 
+        href="여기에_복사한_깃허브_주소를_붙여넣으세요" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        style={{ 
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '12px 25px', 
+          backgroundColor: '#24292e', // 깃허브 공식 색상 (다크)
+          color: 'white', 
+          textDecoration: 'none', 
+          borderRadius: '8px',
+          fontSize: '15px',
+          fontWeight: 'bold',
+          transition: '0.3s'
+        }}
+        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#000'} // 마우스 올리면 더 진하게
+        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#24292e'}
+      >
+        {/* 깃허브 아이콘 대신 텍스트로 심플하게 표현 */}
+        🐙 GitHub Repository 방문하기
+      </a>
+      {/* 👆 [여기까지 복사] */}
+
+    </div>
+  </div>
+);
+}
   );
 }
