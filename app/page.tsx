@@ -31,7 +31,7 @@ export default function Home() {
   // 1. 로그인 처리
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/login", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userid: loginId, password: loginPw }),
@@ -53,7 +53,7 @@ export default function Home() {
   // 2. 회원가입 처리
   const handleSignup = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/signup", {
+      const response = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userid, password, name, birthyear: Number(birthyear), address }),
@@ -161,7 +161,7 @@ export default function Home() {
                     window.initMap(); // 지도 그리기 시작!
                     
                     // 3. 지도 그려진 뒤, DB에서 데이터 가져와서 마커 찍기
-                    fetch("http://127.0.0.1:8000/api/shelters")
+                    fetch("/api/shelters")
                       .then(res => res.json())
                       .then(data => {
                          if(window.initMarkers) window.initMarkers(data);
