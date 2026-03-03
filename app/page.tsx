@@ -11,11 +11,11 @@ export default function Home() {
   const [birthyear, setBirthyear] = useState("");
   const [address, setAddress] = useState("");
 
-  // 🧺 로그인용 바구니 (새로 추가됨!)
+  // 🧺 로그인용 바구니
   const [loginId, setLoginId] = useState("");
   const [loginPw, setLoginPw] = useState("");
 
-  // 🚀 회원가입 함수 (아까 성공하신 그 코드!)
+  // 🚀 회원가입 함수
   const handleSignup = async () => {
     const userData = { userid: userid, password: password, name: name, birthyear: Number(birthyear), address: address };
     try {
@@ -36,7 +36,7 @@ export default function Home() {
     }
   };
 
-  // 🚀 로그인 함수 (새로 추가됨!)
+  // 🚀 로그인 함수
   const handleLogin = async () => {
     const loginData = { userid: loginId, password: loginPw };
     try {
@@ -49,7 +49,6 @@ export default function Home() {
       
       if (response.ok) {
         alert(result.message); // 로그인 성공 알림!
-        // 로그인 성공 후 화면을 바꾸고 싶다면 여기에 코드를 추가하면 됩니다.
       } else {
         alert("로그인 실패: " + result.detail);
       }
@@ -94,11 +93,8 @@ export default function Home() {
             </p>
           </div>
         )}
-      </div>
-    </div>
-   
 
-      {/* 👇 [여기서부터 복사] 구분선과 깃허브 링크 버튼 */}
+      {/* 👇 깃허브 버튼을 '흰색 박스' 안쪽에 안전하게 넣었습니다! */}
       <hr style={{ margin: '30px 0', border: 'none', borderTop: '1px solid #eee' }} />
       
       <p style={{ fontSize: '13px', color: '#666', marginBottom: '10px' }}>
@@ -106,7 +102,7 @@ export default function Home() {
       </p>
       
       <a 
-        href="https://github.com/githyuk/data-school-1st-azure-static-web-app.git" 
+        href="https://github.com/githyuk/data-school-1st-azure-static-web-app" 
         target="_blank" 
         rel="noopener noreferrer"
         style={{ 
@@ -125,12 +121,10 @@ export default function Home() {
         onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#000'} // 마우스 올리면 더 진하게
         onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#24292e'}
       >
-        {/* 깃허브 아이콘 대신 텍스트로 심플하게 표현 */}
         🐙 GitHub Repository 방문하기
       </a>
-      {/* 👆 [여기까지 복사] */}
 
-    </div>
-  </div>
+      </div> {/* 흰색 박스 닫기 */}
+    </div> {/* 회색 배경 닫기 */}
   );
 }
