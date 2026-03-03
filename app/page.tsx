@@ -2,6 +2,21 @@
 import { useState, useEffect } from "react";
 import Script from "next/script";
 
+"use client";
+import { useState, useEffect } from "react";
+import Script from "next/script";
+
+// 👇 [이 부분을 추가하세요] TypeScript 검사관에게 kakao의 존재를 알립니다.
+declare global {
+  interface Window {
+    kakao: any;
+    initMarkers: any;
+  }
+}
+
+export default function Home() {
+  // ... 나머지 코드는 그대로 두시면 됩니다.
+
 export default function Home() {
   const [isLogin, setIsLogin] = useState(false);
   const [userName, setUserName] = useState("");
